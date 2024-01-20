@@ -1,7 +1,14 @@
 import sqlalchemy as sq
 
 test = sq.create_engine("sqlite+pysqlite:///data.db")
-file = open("raw_data/top_excluding_sqlite.txt","a")
+file = [
+
+    open("raw_data/mysql.txt","a"),
+    open("raw_data/postgres.txt","a"),
+    open("raw_data/sqlite.txt","a")
+    open("raw_data/top_no_sqlite.txt","a"),
+    open("raw_data/top.txt","a"),
+
 
 try:
     with test.connect() as db:
