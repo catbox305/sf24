@@ -5,23 +5,40 @@ file = open("raw_data/top_excluding_sqlite.txt","a")
 
 try:
     with test.connect() as db:
-        result = db.execute(sq.text(
-            """
-            /*
-            SELECT query, AVG(time)
+        mysql = db.execute(sq.text(
+            """SELECT query, AVG(time)
             FROM data
             WHERE database='mysql' AND NOT query IN ('short insert 1','short insert 2','long insert 1','long insert 2')
             GROUP BY query
-            ORDER BY query
-            */
-            SELECT query, database, MIN(time)
+            ORDER BY query"""))
+        pg = db.execute(sq.text(
+            """SELECT query, AVG(time)
+            FROM data
+            WHERE database='postgresql' AND NOT query IN ('short insert 1','short insert 2','long insert 1','long insert 2')
+            GROUP BY query
+            ORDER BY query"""))
+        sqlite = db.execute(sq.text(
+            """SELECT query, AVG(time)
+            FROM data
+            WHERE database='sqlite' AND NOT query IN ('short insert 1','short insert 2','long insert 1','long insert 2')
+            GROUP BY query
+            ORDER BY query"""))
+        
+        top_no_sqlite = db.execute(sq.text(
+            """SELECT query, database, MIN(time)
             FROM data
             WHERE NOT query IN ('short insert 1','short insert 2','long insert 1','long insert 2') AND NOT database='sqlite'
             GROUP BY query
-            ORDER BY query
-            """
-        ))
-        for row in result.fetchall():
-            file.write(str(row[0].ljust(len("drop table if exists"))+" : "+row[1].ljust(len("postgresql"))+" : "+f"{row[2]:.12f}")+"\n")
+            ORDER BY query"""))
+        top = db.execute(sq.text(
+            """SELECT query, database, MIN(time)
+            FROM data
+            WHERE NOT query IN ('short insert 1','short insert 2','long insert 1','long insert 2')
+            GROUP BY query
+            ORDER BY query"""))
+
+        for i in [mysql,pg,sqlite,top_no_sqlite,top]:
+            for row in i.fetchall():
+                file.write(str(row[0].ljust(len("drop table if exists"))+" : "+row[1].ljust(len("postgresql"))+" : "+f"{row[2]:.12f}")+"\n")
 finally:
     file.close()
