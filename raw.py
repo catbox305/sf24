@@ -4,16 +4,22 @@ import asyncio
 import sqlalchemy as sq
 import random
 
+open("sqlite3.db","w").close()
+open("data.db","w").close()
+
+raise Exception("\n\nTest failed, remove line 10 of raw.py and try again.\n\n") # Remove this line
 
 sqlite = sq.create_engine("sqlite+pysqlite:///sqlite3.db")
-postgres = sq.create_engine("postgresql+pg8000://USER:PASSWORD@localhost:PORT/DB")
-mysql = sq.create_engine("mysql+pymysql://USER:PASSWORD@localhost/DB")
+postgres = sq.create_engine("postgresql+pg8000://USER:PASSWORD@localhost:PORT/DB") # Fill in placeholders before running
+mysql = sq.create_engine("mysql+pymysql://USER:PASSWORD@localhost/DB") # FIll in placeholders before running
+log = sq.create_engine("sqlite+pysqlite:///data.db")
 
-testdata = sq.create_engine("sqlite+pysqlite:///data.db")
+with log.connect() as con:
+    con.execute(sq.text("CREATE TABLE IF NOT EXISTS data (time float(11), query varchar(100), database varchar(100))"))
 
-def test(engine,eta,Test=testdata):
+def test(engine,eta,log=log):
     
-    print(f"[Test {eta}/30] Estimated time remaining: {(510-eta)/60}m")
+    print(f"[Test {eta}/30] Estimated time remaining: {(527-(eta*17))}s")
 
     strings = ["".join(random.choices("q w e r t y u i o p a s d f g h j k l z x c v b n m".split(),k=20)) for i in range(100000)]
     numbers = [random.randint(1000,9000) for i in range(100000)]
@@ -23,8 +29,8 @@ def test(engine,eta,Test=testdata):
     data2 = [{"id":both[1][i]} for i in range(len(both[1]))]
     data3 = [{"token":both[0][i], "id":both[1][i]} for i in range(len(both[0]))]
 
-    with engine.connect() as db:
 
+    with engine.connect() as db:
         db.info.setdefault("dbname", []).append(engine.name)
 
         @sq.event.listens_for(db, "before_cursor_execute")
@@ -34,7 +40,7 @@ def test(engine,eta,Test=testdata):
 
 
         @sq.event.listens_for(db, "after_cursor_execute")
-        def after_cursor_execute(conn, cursor, statement, parameters, context, executemany, testdata=testdata):
+        def after_cursor_execute(conn, cursor, statement, parameters, context, executemany, testdata=log):
 
             total = time.time() - conn.info["query_start_time"].pop(-1)
 
@@ -43,7 +49,7 @@ def test(engine,eta,Test=testdata):
                 db.execute(sq.text("INSERT INTO data (time, query, database) VALUES (:time, :query, :database)"),{"time":total, "query":str(statement.split("*")[1].strip()), "database":conn.info["dbname"][0]})
 
 
-
+        
         db.execute(sq.text("/* drop table if exists */ DROP TABLE IF EXISTS test"))
 
         db.execute(sq.text("/* create table */ CREATE TABLE test (token varchar(100), id int)"))
@@ -70,7 +76,13 @@ def test(engine,eta,Test=testdata):
 
         db.execute(sq.text("/* select min max avg */ SELECT MIN(id),MAX(id),AVG(id) FROM test")).fetchall()
 
-for i in range(2):
-    test(sqlite)
-    test(mysql)
-    test(postgres)
+counter = 1
+for i in range(10):
+    test(sqlite,counter)
+    counter += 1
+    test(mysql,counter)
+    counter +=1 
+    test(postgres,counter)
+    counter +=1
+
+print("\nTest Completed! You can now proceed to step eight\n")
