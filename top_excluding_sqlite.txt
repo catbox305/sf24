@@ -1,0 +1,9 @@
+create table         : postgresql : 0.000864028931
+drop table if exists : postgresql : 0.000598192215
+long insert          : mysql      : 3.888335704803
+select               : postgresql : 0.312963008881
+select count         : postgresql : 0.024907827377
+select min max avg   : postgresql : 0.031958103180
+select order by      : postgresql : 0.391806840897
+select where between : postgresql : 0.094471931458
+short insert         : mysql      : 0.006125688553

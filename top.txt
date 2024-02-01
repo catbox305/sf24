@@ -1,0 +1,9 @@
+create table         : sqlite     : 0.000378131866
+drop table if exists : postgresql : 0.000598192215
+long insert          : sqlite     : 0.047628879547
+select               : sqlite     : 0.000045061111
+select count         : sqlite     : 0.012302875519
+select min max avg   : sqlite     : 0.022182941437
+select order by      : sqlite     : 0.092270135880
+select where between : sqlite     : 0.000067949295
+short insert         : sqlite     : 0.000075101852
