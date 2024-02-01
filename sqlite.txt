@@ -1,0 +1,9 @@
+create table         : 0.000445582650
+drop table if exists : 0.001218405637
+long insert          : 0.056368220936
+select               : 0.000106378035
+select count         : 0.012699452314
+select min max avg   : 0.022897742011
+select order by      : 0.094258828597
+select where between : 0.000106313012
+short insert         : 0.000082211061
